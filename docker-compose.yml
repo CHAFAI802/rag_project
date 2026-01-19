@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - CHUNK_SIZE=${CHUNK_SIZE:-500}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-100}
+      - VECTOR_DIMENSION=${VECTOR_DIMENSION:-384}
+      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-sentence-transformers/all-MiniLM-L6-v2}
+    volumes:
+      # Persist data across container restarts
+      - ./data:/app/data
+      # Optional: mount source code for development
+      - ./app:/app/app
+    environment:
+      PYTHONUNBUFFERED: "1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+# Optional: Add other services here (PostgreSQL, Redis, etc.) for future phases
+# 
+# services:
+#   postgres:
+#     image: postgres:15-alpine
+#     environment:
+#       POSTGRES_DB: rag_db
+#       POSTGRES_USER: rag_user
+#       POSTGRES_PASSWORD: ${DB_PASSWORD}
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     ports:
+#       - "5432:5432"
+#
+#   redis:
+#     image: redis:7-alpine
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+
+# volumes:
+#   postgres_data:
+#   redis_data:

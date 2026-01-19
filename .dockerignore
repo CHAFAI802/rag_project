@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (don't include in image, will be mounted as volume)
+data/
+*.faiss
+*.json
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node modules (if using frontend)
+node_modules/
+npm-debug.log
