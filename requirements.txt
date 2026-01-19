@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+python-dotenv
+
+sentence-transformers
+faiss-cpu
+
+pypdf
+python-docx
+unstructured
+
+transformers
+torch
