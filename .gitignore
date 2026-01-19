@@ -18,3 +18,4 @@ secrets*.json
 .ipynb_checkpoints/
 .vscode/
 .idea/
+.env
