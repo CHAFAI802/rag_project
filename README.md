@@ -691,6 +691,6 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Made with ❤️ by the RAG Team**
+**Made with ❤️ by CHAFAI MABROUK**
 
 Last updated: January 19, 2026
