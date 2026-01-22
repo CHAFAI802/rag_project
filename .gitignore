@@ -1,21 +1,86 @@
+# Python environments
 .venv/
-__pycache__/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.egg
 
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Data and vectors
 data/*
 !data/.gitkeep
-
 *.faiss
 *.safetensors
 *.ckpt
 *.pt
 
+# Logs and outputs
 *.log
 *.csv
+*.json
+nohup.out
+/tmp/
 
+# Configuration
 secrets*.json
+.env
+.env.local
+.env.*.local
 
+# IDE and OS
 .DS_Store
 .ipynb_checkpoints/
 .vscode/
 .idea/
-.env
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Test and temporary files
+test_*.py
+*_test.py
+*.pytest_cache/
+.coverage
+htmlcov/
+
+# Demo and reporting files (generated during development)
+DEMO_LIVE_REPORT.md
+DEMO_LIVE_RESULTS.json
+DATABASE_VERIFICATION.json
+DATABASE_REPORT.md
+RAG_QUALITY_TEST_*.json
+RAG_*_EVALUATION.md
+DELIVERY_SUMMARY.py
+FRONTEND_DELIVERY_SUMMARY.py
+DOCUMENTATION_INDEX.md
+EXECUTIVE_SUMMARY.md
+IMPLEMENTATION_COMPLETE.md
+QA_MASTER_CHECKLIST.md
+QUALITY_TESTING_GUIDE.md
+QUICK_START.md
+FRONTEND_SUMMARY.md
+README_TESTING.md
+FRONTEND_QUICKSTART.md
+QUICK_REFERENCE.sh
+SHELL_SCRIPTS_README.md
+FRONTEND_FILES_MANIFEST.txt
+DEPLOY_FRONTEND_NOW.md
+TESTING_GUIDE_COMPLETE.md
+LLM_IMPROVEMENTS.md
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
