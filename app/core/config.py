@@ -37,9 +37,10 @@ FAISS_INDEX_DIR.mkdir(parents=True, exist_ok=True)
 EMBEDDING_MODEL = EMBEDDING_MODEL_NAME
 EMBEDDING_DIM = VECTOR_DIMENSION
 K_RESULTS = 5
+# Use distilgpt2 with optimized parameters for accurate answers
 LLM_MODEL = "distilgpt2"  # Lightweight model (~340MB, fits in 4GB RAM)
-LLM_MAX_TOKENS = 300
-LLM_TEMPERATURE = 0.7
+LLM_MAX_TOKENS = 150  # Reduced to force concise, focused answers
+LLM_TEMPERATURE = 0.2  # Very low temperature for factual, deterministic answers
 
 # ======================
 # Sanity checks

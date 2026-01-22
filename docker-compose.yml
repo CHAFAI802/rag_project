@@ -20,7 +20,7 @@ services:
       # Optional: mount source code for development
       - ./app:/app/app
     environment:
-      PYTHONUNBUFFERED: "1"
+      - PYTHONUNBUFFERED=1
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

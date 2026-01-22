@@ -1,7 +1,7 @@
 import logging
 import shutil
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from app.services.document_loader import load_document
 from app.services.rag_pipeline import index_document
@@ -13,6 +13,8 @@ router = APIRouter()
 
 # Max file size: 50MB
 MAX_FILE_SIZE = 50 * 1024 * 1024
+# Allowed file extensions
+ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt', '.md'}
 
 
 @router.post("/ingest")
@@ -27,6 +29,21 @@ async def ingest_document(file: UploadFile = File(...)):
         if not file.filename:
             logger.error("Empty filename")
             raise HTTPException(status_code=400, detail="Filename required")
+        
+        # Security: prevent path traversal attacks
+        filename = PurePath(file.filename).name
+        if filename != file.filename:
+            logger.warning(f"Path traversal attempt detected: {file.filename}")
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        
+        # Validate file extension
+        file_extension = Path(filename).suffix.lower()
+        if file_extension not in ALLOWED_EXTENSIONS:
+            logger.error(f"Unsupported file format: {file_extension}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Unsupported file format. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+            )
         
         # Check file size
         file.file.seek(0, 2)
@@ -46,7 +63,7 @@ async def ingest_document(file: UploadFile = File(...)):
         
         # Save file
         RAW_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-        file_path = RAW_DOCS_DIR / file.filename
+        file_path = RAW_DOCS_DIR / filename
         
         logger.info(f"Saving file: {file_path}")
         

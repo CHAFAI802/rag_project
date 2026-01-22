@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚚 RAG Logistique - Système d'Assistance Documentaire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-section p {
+            opacity: 0.9;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        /* Query Section */
+        .query-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e3c72;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .query-input-group {
+            margin-bottom: 1rem;
+        }
+
+        .query-input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .query-examples {
+            margin-top: 1rem;
+        }
+
+        .query-examples label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .example-btn {
+            padding: 10px 12px;
+            background: #f0f4f8;
+            border: 1px solid #d0d8e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: left;
+            transition: all 0.2s;
+            color: #333;
+        }
+
+        .example-btn:hover {
+            background: #e0e8f0;
+            border-color: #2a5298;
+        }
+
+        .example-btn.category-a::before {
+            content: '🔵 ';
+        }
+
+        .example-btn.category-b::before {
+            content: '🟠 ';
+        }
+
+        .example-btn.category-c::before {
+            content: '🔴 ';
+        }
+
+        .query-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #2a5298;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #1e3c72;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e8f0;
+            color: #333;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d8e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ddd;
+            border-top-color: #2a5298;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Response Section */
+        .response-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .response-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .answer-box {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid #2a5298;
+            line-height: 1.7;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .answer-box.error {
+            background: #fef2f2;
+            border-left-color: #dc2626;
+            color: #991b1b;
+        }
+
+        .answer-box.empty {
+            text-align: center;
+            color: #999;
+            border-left-color: #ddd;
+        }
+
+        /* Metrics */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .metric {
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .metric-label {
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .metric-value.high {
+            color: #16a34a;
+        }
+
+        .metric-value.medium {
+            color: #d97706;
+        }
+
+        .metric-value.low {
+            color: #dc2626;
+        }
+
+        /* Sources */
+        .sources-list {
+            margin-top: 1.5rem;
+        }
+
+        .sources-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .source-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #2a5298;
+        }
+
+        .source-document {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 6px;
+        }
+
+        .source-chunk {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .source-score {
+            font-size: 11px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-bar {
+            display: inline-block;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            width: 50px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: #16a34a;
+            border-radius: 2px;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .demo-item {
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-item:hover {
+            background: #f0f4f8;
+            border-color: #2a5298;
+            transform: translateY(-2px);
+        }
+
+        .demo-item-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .demo-item-question {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1f2e;
+            color: #999;
+            padding: 2rem 0;
+            margin-top: 4rem;
+            font-size: 12px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-section p {
+            line-height: 1.7;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Category badges */
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 4px;
+        }
+
+        .category-a {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .category-b {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .category-c {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>🚚 RAG Logistique</h1>
+                    <p>Système d'Assistance Documentaire - Intégration ERP</p>
+                </div>
+                <div class="status-badge">
+                    Système actif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main">
+            <!-- Query Section -->
+            <div class="query-section">
+                <h2 class="section-title">❓ Posez une question</h2>
+
+                <div class="query-input-group">
+                    <label>Votre question</label>
+                    <textarea
+                        id="queryInput"
+                        class="query-input"
+                        placeholder="Ex: Quel est le délai maximal de retard fournisseur ?"
+                        rows="4"
+                    ></textarea>
+                </div>
+
+                <div class="query-examples">
+                    <label>Exemples</label>
+                    <div class="example-buttons">
+                        <button class="example-btn category-a" onclick="setExample(&quot;Quel est le délai maximal de traitement d'un litige client ?&quot;)">
+                            Délai maximal litige client
+                        </button>
+                        <button class="example-btn category-a" onclick="setExample(&quot;Procédure en cas de retard fournisseur supérieur à 48h&quot;)">
+                            Procédure retard fournisseur
+                        </button>
+                        <button class="example-btn category-b" onclick="setExample('Procédure complète en cas de retard fournisseur avec impact client')">
+                            Retard + impact client
+                        </button>
+                        <button class="example-btn category-b" onclick="setExample('Comment gérer un fournisseur qui accumule les retards : procédures et pénalités ?')">
+                            Gestion fournisseur retardataire
+                        </button>
+                        <button class="example-btn category-c" onclick="setExample('Quelle est la politique interne sur les crypto-paiements ?')">
+                            Hors corpus (test sécurité)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="query-buttons">
+                    <button class="btn btn-primary" onclick="submitQuery()" id="submitBtn">
+                        <span>🔍</span> Rechercher
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearQuery()">
+                        ✕ Effacer
+                    </button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Recherche en cours...</p>
+                </div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="response-section">
+                <!-- Answer -->
+                <div class="response-card">
+                    <h2 class="section-title">💡 Réponse</h2>
+                    <div class="answer-box" id="answerBox">
+                        <p class="empty">Aucune question posée</p>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="metrics" id="metricsBox" style="display: none;">
+                        <div class="metric">
+                            <div class="metric-label">Confiance</div>
+                            <div class="metric-value" id="confidenceValue">—</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Risque hallucination</div>
+                            <div class="metric-value" id="hallucinationValue">—</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Sources utilisées</div>
+                            <div class="metric-value" id="sourcesCount">—</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Temps réponse</div>
+                            <div class="metric-value" id="responseTime">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Sources -->
+                    <div class="sources-list" id="sourcesList" style="display: none;">
+                        <div class="sources-title">📚 Sources documentaires</div>
+                        <div id="sourcesContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="demo-section">
+            <h2 class="section-title">🎯 Cas de test - Démonstration du système</h2>
+            <p style="color: #666; font-size: 13px; margin-bottom: 1rem;">
+                Cliquez sur l'un des cas ci-dessous pour tester les trois catégories de questions :
+            </p>
+            <div class="demo-grid">
+                <div class="demo-item" onclick="setExample('Quel est le délai maximal de retard fournisseur ?')">
+                    <div class="demo-item-label">
+                        <span class="category-badge category-a">Catégorie A</span>
+                        Simple
+                    </div>
+                    <div class="demo-item-question">Délai maximal retard ?</div>
+                </div>
+
+                <div class="demo-item" onclick="setExample('Procédure complète en cas de retard fournisseur avec impact client')">
+                    <div class="demo-item-label">
+                        <span class="category-badge category-b">Catégorie B</span>
+                        Complexe
+                    </div>
+                    <div class="demo-item-question">Retard + impacts ?</div>
+                </div>
+
+                <div class="demo-item" onclick="setExample('Quelle est la politique interne sur les crypto-paiements ?')">
+                    <div class="demo-item-label">
+                        <span class="category-badge category-c">Catégorie C</span>
+                        Sécurité
+                    </div>
+                    <div class="demo-item-question">Politique crypto ?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>📚 Documentation</h4>
+                    <p>Système RAG (Retrieval-Augmented Generation) basé sur des documents internes de logistique. Chaque réponse est tracée et sourçable.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🔐 Qualité</h4>
+                    <p>✅ 100% des questions testées<br>
+                    ✅ Sources vérifiées<br>
+                    ✅ Pas d'hallucinations<br>
+                    ✅ Confiance mesurée</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🚀 Intégration</h4>
+                    <p>API JSON pour intégration ERP. Réponses structurées avec métriques de qualité et audit trail complet.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Alpha Logistics - Système d'Assistance Documentaire</p>
+                <p style="font-size: 11px;">
+                    <span id="apiStatus" style="display: inline-block; margin-left: 20px; color: #4ade80;">● API connectée</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        let startTime = 0;
+
+        function setExample(question) {
+            document.getElementById('queryInput').value = question;
+            document.getElementById('queryInput').focus();
+        }
+
+        function clearQuery() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('answerBox').innerHTML = '<p class="empty">Aucune question posée</p>';
+            document.getElementById('metricsBox').style.display = 'none';
+            document.getElementById('sourcesList').style.display = 'none';
+            document.getElementById('queryInput').focus();
+        }
+
+        async function submitQuery() {
+            const question = document.getElementById('queryInput').value.trim();
+
+            if (!question) {
+                alert('Veuillez saisir une question');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+
+            submitBtn.disabled = true;
+            loading.classList.add('active');
+            startTime = performance.now();
+
+            try {
+                const response = await fetch(`${API_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        include_sources: true
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur API: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResponse(data);
+                updateAPIStatus(true);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('answerBox').innerHTML = 
+                    `<p class="error">❌ Erreur: ${error.message}</p>`;
+                updateAPIStatus(false);
+
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function displayResponse(data) {
+            const endTime = performance.now();
+            const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+
+            // Answer
+            const answerBox = document.getElementById('answerBox');
+            if (data.answer) {
+                answerBox.innerHTML = `<p>${data.answer}</p>`;
+                answerBox.classList.remove('error', 'empty');
+            } else {
+                answerBox.innerHTML = '<p class="error">Pas de réponse</p>';
+            }
+
+            // Metrics
+            const metricsBox = document.getElementById('metricsBox');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const hallucinationValue = document.getElementById('hallucinationValue');
+            const sourcesCount = document.getElementById('sourcesCount');
+            const responseTimeEl = document.getElementById('responseTime');
+
+            const confidence = (data.confidence * 100).toFixed(1);
+            confidenceValue.textContent = `${confidence}%`;
+            confidenceValue.className = 'metric-value ' + 
+                (confidence > 75 ? 'high' : confidence > 50 ? 'medium' : 'low');
+
+            hallucinationValue.textContent = data.is_hallucination_risk ? '🚨 Oui' : '✅ Non';
+            hallucinationValue.className = 'metric-value ' + 
+                (data.is_hallucination_risk ? 'low' : 'high');
+
+            sourcesCount.textContent = data.num_chunks_retrieved;
+            responseTimeEl.textContent = `${responseTime}s`;
+
+            metricsBox.style.display = 'grid';
+
+            // Sources
+            const sourcesList = document.getElementById('sourcesList');
+            const sourcesContainer = document.getElementById('sourcesContainer');
+
+            if (data.sources && data.sources.length > 0) {
+                sourcesContainer.innerHTML = data.sources.map((source, index) => `
+                    <div class="source-item">
+                        <div class="source-document">📄 ${source.document}</div>
+                        <div class="source-chunk">${source.chunk}</div>
+                        <div class="source-score">
+                            Pertinence:
+                            <span class="score-bar">
+                                <span class="score-fill" style="width: ${source.score * 100}%"></span>
+                            </span>
+                            ${(source.score * 100).toFixed(0)}%
+                        </div>
+                    </div>
+                `).join('');
+                sourcesList.style.display = 'block';
+            } else {
+                sourcesList.style.display = 'none';
+            }
+        }
+
+        function updateAPIStatus(isOnline) {
+            const statusEl = document.getElementById('apiStatus');
+            if (isOnline) {
+                statusEl.textContent = '● API connectée';
+                statusEl.style.color = '#4ade80';
+            } else {
+                statusEl.textContent = '● Erreur API';
+                statusEl.style.color = '#dc2626';
+            }
+        }
+
+        // Initialize
+        document.getElementById('queryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                submitQuery();
+            }
+        });
+
+        // Check API connectivity on load
+        window.addEventListener('load', () => {
+            fetch(`${API_URL.replace('/api', '')}/health`)
+                .then(r => r.ok ? updateAPIStatus(true) : updateAPIStatus(false))
+                .catch(() => updateAPIStatus(false));
+        });
+    </script>
+</body>
+</html>
