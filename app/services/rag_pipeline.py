@@ -7,6 +7,7 @@ from app.services.chunker import chunk_text
 from app.core.llm import generate_answer
 from app.core.config import CHUNK_SIZE, CHUNK_OVERLAP, K_RESULTS, EMBEDDING_DIM
 from app.models.response_models import QueryResponse, SourceChunk
+from app.core.tokenization import count_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,12 @@ def index_document(text: str, source: str):
     try:
         logger.info(f"Starting indexing for source: {source}")
         
-        chunks = chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP)
+        chunks = chunk_text(
+            text,
+            chunk_size=CHUNK_SIZE,
+            overlap=CHUNK_OVERLAP,
+            token_counter=count_tokens,
+        )
         logger.debug(f"Created {len(chunks)} chunks")
         
         if not chunks:

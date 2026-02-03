@@ -1,11 +1,15 @@
-"""
-Data models for RAG system responses with source tracking.
-Enables transparent, traceable answers grounded in documents.
-"""
+"""Data models for RAG system responses with source tracking."""
 
-from pydantic import BaseModel, Field
+from datetime import datetime, timezone
 from typing import List, Optional
-from datetime import datetime
+
+from pydantic import BaseModel, Field, ConfigDict
+
+
+def _utc_now() -> datetime:
+    """Return timezone-aware UTC timestamp."""
+
+    return datetime.now(timezone.utc)
 
 
 class SourceChunk(BaseModel):
@@ -19,17 +23,17 @@ class SourceChunk(BaseModel):
 
 class QueryResponse(BaseModel):
     """Response to a query with full source tracking."""
-    
+
     query: str = Field(..., description="Original user query")
     answer: str = Field(..., description="Generated answer based on retrieved context")
     sources: List[SourceChunk] = Field(default_factory=list, description="List of source chunks used")
     confidence: float = Field(..., ge=0.0, le=1.0, description="Average confidence score")
     num_chunks_retrieved: int = Field(..., ge=0, description="Number of chunks retrieved")
     is_hallucination_risk: bool = Field(default=False, description="True if answer might be hallucinated")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response generation time")
-    
-    class Config:
-        schema_extra = {
+    timestamp: datetime = Field(default_factory=_utc_now, description="Response generation time")
+
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "query": "Délai maximal de traitement d'un litige client ?",
                 "answer": "Le délai maximal pour signaler un litige est de 7 jours après livraison...",
@@ -38,15 +42,16 @@ class QueryResponse(BaseModel):
                         "document": "sla_fournisseurs.txt",
                         "chunk": "Délai maximal pour signaler un litige : 7 jours après livraison",
                         "score": 0.92,
-                        "chunk_index": 3
+                        "chunk_index": 3,
                     }
                 ],
                 "confidence": 0.92,
                 "num_chunks_retrieved": 1,
                 "is_hallucination_risk": False,
-                "timestamp": "2025-01-21T14:30:00"
+                "timestamp": "2025-01-21T14:30:00+00:00",
             }
         }
+    )
 
 
 class BulkQueryResponse(BaseModel):
@@ -76,8 +81,8 @@ class QualityMetrics(BaseModel):
 
 class QualityTestReport(BaseModel):
     """Complete quality test report."""
-    
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+    timestamp: datetime = Field(default_factory=_utc_now)
     total_tests: int = Field(..., description="Total tests run")
     passed_tests: int = Field(..., description="Tests passed")
     test_metrics: List[QualityMetrics] = Field(default_factory=list)
